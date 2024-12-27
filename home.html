@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Recognition and Translation</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Times New Roman', Times, serif;
+            background: linear-gradient(to right, blue, turquoise);
+            color: black;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            margin: auto;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .recognized-audio {
+            font-size: 1.5rem;
+            margin: 20px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn:hover {
+            background-color: grey;
+            color: whitesmoke;
+        }
+
+        .translation {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        select {
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 1rem;
+            background-color: white;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Speech Recognition and Translation</h1>
+            <p>Speak into the microphone to see your speech converted to text and translated!</p>
+        </div>
+
+        <div>
+            <label for="language-select">Choose Language:</label>
+            <select id="language-select">
+                <option value="en-US" selected>English (US)</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="ta-IN">Tamil</option>
+                <option value="te-IN">Telugu</option>
+                <option value="ml-IN">Malayalam</option>
+                <option value="bn-IN">Bengali</option>
+                <option value="kn-IN">Kannada</option>
+                <option value="es-ES">Spanish</option>
+                <option value="fr-FR">French</option>
+                
+            </select>
+        </div>
+
+        <div id="recognized-audio" class="recognized-audio">
+            <!-- Recognized text will appear here -->
+        </div>
+        <button id="start-recognition" class="btn">Start Recognition</button>
+
+        <div id="translation-result" class="translation">
+            <!-- Translated text will appear here -->
+        </div>
+    </div>
+
+    <script>
+        const button = document.getElementById('start-recognition');
+        const recognizedAudio = document.getElementById('recognized-audio');
+        const translationResult = document.getElementById('translation-result');
+        const languageSelect = document.getElementById('language-select');
+
+        // Check for browser compatibility
+        if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+            recognizedAudio.textContent = "Speech recognition not supported in this browser.";
+        } else {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+
+            recognition.continuous = false; // Stops listening after one recognition
+            recognition.interimResults = false; // Do not show interim results
+
+            button.addEventListener('click', () => {
+                const selectedLanguage = languageSelect.value; // Get selected language
+                recognition.lang = selectedLanguage; // Set recognition language
+                recognizedAudio.textContent = `Listening in ${languageSelect.options[languageSelect.selectedIndex].text}...`;
+                recognition.start();
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                recognizedAudio.textContent = `Recognized: ${transcript}`;
+            
+                // Redirect to the translation_result page with the recognized text
+                const nextPageUrl = `/translation_result/?recognized_text=${encodeURIComponent(transcript)}`;
+                window.location.href = nextPageUrl;
+            };
+
+            recognition.onerror = (event) => {
+                recognizedAudio.textContent = `Error: ${event.error}`;
+            };
+
+            recognition.onend = () => {
+                recognizedAudio.textContent += " done ";
+            };
+        }
+    </script>
+</body>
+</html>
